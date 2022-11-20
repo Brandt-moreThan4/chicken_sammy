@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import List
 import streamlit as st
 import plotly.express as px
+from data_cleaning import gdata
 
 
 
@@ -17,7 +18,6 @@ INTRO_MD = '''
 
 st.markdown(INTRO_MD)
 
-from data_cleaning import gdata
 
 
 
