@@ -25,6 +25,12 @@ class GroupMeData:
     def load_all_data(self):
         self.load_convo_data()
         self.load_message_data()
+        self.clean_data()
+
+        self.member_count = len(self.members_data)
+        self.msg_count = len(self.df_msg)
+
+
 
     def load_message_data(self):
         with self.MESSAGE_PATH.open(encoding=self.ENCODING) as f:
@@ -44,7 +50,7 @@ class GroupMeData:
     def clean_data(self):
 
         MSG_COLS_TO_KEEP = ['attachments', 'created_at', 'favorited_by', 'name',  'sender_type', 'system','text', 'user_id', 'event']        
-        df = self.msg_data[MSG_COLS_TO_KEEP].copy()
+        df = self.df_data_msg[MSG_COLS_TO_KEEP].copy()
         df = df[df.system == False].copy() # Don't care about system messages for this analysis.
         df['created_at'] = df.created_at.apply(datetime.utcfromtimestamp)
         df['like_count'] = df.favorited_by.apply(len)
@@ -61,6 +67,9 @@ class GroupMeData:
 
         self.df_msg = df
 
+    # @property
+    # def member_count(self) -> int:
+    #     return len(self.members_data)
 
 def has_image(data:List[dict]) -> bool:
     contains_image = False   
@@ -69,3 +78,5 @@ def has_image(data:List[dict]) -> bool:
            contains_image = True
     return contains_image
 
+
+data = GroupMeData()
