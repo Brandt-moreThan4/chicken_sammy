@@ -79,4 +79,4 @@ def has_image(data:List[dict]) -> bool:
     return contains_image
 
 
-data = GroupMeData()
+gdata = GroupMeData()

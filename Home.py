@@ -17,11 +17,11 @@ INTRO_MD = '''
 
 st.markdown(INTRO_MD)
 
-from data_cleaning import data
+from data_cleaning import gdata
 
 
 
-df = data.df_msg
+df = gdata.df_msg
 
 st.markdown('### Wordiest Individuals')
 char_counts = df.groupby('name')['char_count'].mean().sort_values(ascending=False).to_frame().iloc[:15].reset_index()
