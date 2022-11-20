@@ -8,7 +8,7 @@ st.markdown('## Member Data')
 st.write(gdata.df_members)
 
 st.markdown('## MSG Data (Bug here)')
-st.write(gdata.df_msg)
+# st.write(gdata.df_msg)
 
 
 st.markdown('## Muted People')
