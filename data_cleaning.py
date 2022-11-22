@@ -6,30 +6,40 @@ from typing import List
 import streamlit as st
 import plotly.express as px
 import matplotlib.pyplot as plt
+import streamlit.components.v1 as components
 
 
 
+class DataCalcs:
+    def calculate_properties(self):
+        self.member_count = len(self.members_data)
+        self.msg_count = len(self.df_msg)
+        self.member_names = self.df_members.name.unique().tolist()
 
-class GroupMeData:
+    def most_liked_msg(self) -> pd.Series:
+        return self.df_msg.sort_values('like_count').iloc[-1]
+
+
+class DataWrangler(DataCalcs):
     DATA_PATH = Path('data') / '53526472'
     MESSAGE_PATH = DATA_PATH / 'message.json'
     CONVO_PATH = DATA_PATH / 'conversation.json'   
     ENCODING = 'utf-8'
 
     def __init__(self,load_data=True) -> None:
-        self.msg_data = {}
-
         if load_data:
             self.load_all_data()
+        self.calculate_properties()
 
     def load_all_data(self):
         self.load_convo_data()
         self.load_message_data()
         self.clean_data()
 
+    def calculate_properties(self):
         self.member_count = len(self.members_data)
         self.msg_count = len(self.df_msg)
-
+        self.member_names = self.df_members.name.unique().tolist()
 
 
     def load_message_data(self):
@@ -43,9 +53,9 @@ class GroupMeData:
             self.convo_data:dict = json.load(f)
       
         self.members_data:dict = self.convo_data['members']
-        self.df_members = pd.DataFrame(self.members_data)
-        self.id_map:pd.Series = self.df_members[['user_id','name']].set_index('user_id')['name']
-        self.df_id_map = self.df_members[['user_id','name']]
+        self.df_members = pd.DataFrame(self.members_data).set_index('user_id')
+        self.id_map:pd.Series = self.df_members['name']
+        self.df_id_map = self.id_map.reset_index()
 
     def clean_data(self):
 
@@ -61,15 +71,26 @@ class GroupMeData:
         df['date_month'] = pd.PeriodIndex(year=df['created_at'].dt.year,month=df['created_at'].dt.month,freq='M')
         df = df.rename(columns={'name':'msg_name'}) # So we don't get it confused with the permanent name in convo data
         # Combine with member data:
-        df = df.merge(self.df_members[['user_id','nickname','name']],on='user_id',validate='m:1',how='left')
+        df = df.merge(self.df_members[['nickname','name']],left_on='user_id',right_index=True,validate='m:1',how='left')
         COLS_TO_DROP = ['system']
         df.drop(columns=COLS_TO_DROP)       
 
         self.df_msg = df
 
-    # @property
-    # def member_count(self) -> int:
-    #     return len(self.members_data)
+
+
+
+class PersonData(DataCalcs):
+    def __init__(self,user_id:str,data_all:DataWrangler) -> None:
+        self.user_id = user_id
+
+        df_msg_all = data_all.df_msg
+        self.df_msg = df_msg_all[df_msg_all.user_id == user_id]
+        self.member_info = data_all.df_members[data_all.df_members.index == user_id]
+        self.name = self.member_info.name
+    
+
+
 
 def has_image(data:List[dict]) -> bool:
     contains_image = False   
@@ -79,4 +100,8 @@ def has_image(data:List[dict]) -> bool:
     return contains_image
 
 
-gdata = GroupMeData()
+gdata = DataWrangler()
+
+person = PersonData('5994102',gdata)
+
+print('lol')
