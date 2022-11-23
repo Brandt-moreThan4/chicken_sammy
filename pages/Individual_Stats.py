@@ -10,7 +10,7 @@ members = sorted(gdata.member_names)
 members.remove('.') # It makes the UI look back.
 name_select = st.selectbox('Who who you like to get deep into?',members)
 
-st.write('Excellent choice, you selected', name_select)
+st.write('Excellent choice, you selected:', name_select)
 
 user_id = gdata.id_map[gdata.id_map == name_select].index[0]
 person = Person(user_id,gdata)
@@ -34,4 +34,9 @@ if msg.has_image:
 
 st.markdown('#### Your most liked person')
 st.markdown('#### Person who likes you the most')
+st.markdown("#### See All Messages")
+st.markdown("#### See Top N Messages")
+number = st.number_input("Select the number of most-liked Messages you want to see:",1,10)
+st.write('The current number is ', number)
+
 st.markdown('#### ')
