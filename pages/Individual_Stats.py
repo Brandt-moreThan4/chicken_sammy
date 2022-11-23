@@ -29,11 +29,8 @@ if msg.has_image:
     img_html = f''' <img height="300" src="{img.image_url}" alt="Sammy Image"> '''
     components.html(img_html,height=300)
 
-# st.write(msg.text)
-# st.info(msg.text)
 # st.success(msg.text)
 
-# st.write(msg.to_frame())
 
 st.markdown('#### Your most liked person')
 st.markdown('#### Person who likes you the most')
