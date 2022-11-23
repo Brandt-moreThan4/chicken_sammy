@@ -7,7 +7,10 @@ import streamlit as st
 import plotly.express as px
 import matplotlib.pyplot as plt
 import streamlit.components.v1 as components
-from typing import List
+# import nltk
+from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk import FreqDist
+
 
 
 def has_image(data:List[dict]) -> bool:
@@ -22,6 +25,7 @@ class DataCalcs:
         self.member_count = len(self.members_data)
         self.msg_count = len(self.df_msg)
         self.member_names = self.df_members.name.unique().tolist()
+        self.all_text = ''.join(self.df_msg.text)
 
     def most_liked_msg(self) -> "Message":
         return Message(self.df_msg.sort_values('like_count').iloc[-1])
@@ -81,6 +85,8 @@ class DataWrangler(DataCalcs):
         df['attachement_num'] = df.attachments.apply( lambda x: len(x))
         df['has_image'] = df.attachments.apply(has_image)
         df['char_count'] = df.text.apply(lambda x: len(x) if not x is None else False )
+        df['text'] = df['text'].fillna('')
+        df['tokens'] = [word_tokenize(msg) for msg in df.text.array]
         # df['date_month'] = pd.PeriodIndex(year=df['created_at'].dt.year,month=df['created_at'].dt.month,freq='M')
         df = df.rename(columns={'name':'msg_name','id':'msg_id'}) # Be more explicit
 
@@ -94,11 +100,11 @@ class DataWrangler(DataCalcs):
 
 gdata = DataWrangler()
 
-
 class Person(DataCalcs):
     def __init__(self,user_id:str,data_all:DataWrangler=gdata) -> None:
 
         self.user_id = user_id
+        self.all_data = data_all
         df_msg_all = data_all.df_msg
         self.df_msg = df_msg_all[df_msg_all.user_id == user_id]
         self.member_info = data_all.df_members[data_all.df_members.index == user_id]
@@ -112,7 +118,6 @@ class Message:
         self.created_at:datetime = row['created_at']
         self.sender_name: str = row['msg_name']
         self.sender_id:str = row['user_id']
-        # self.person = Person(row['user_id'])
         self.msg_id = row['msg_id']
         self.likes:int = row['like_count']
         self._permname:str = row['name']
@@ -152,6 +157,7 @@ class Attachment:
     @staticmethod
     def extract_imag_id(image_url:str) -> str:
         return image_url[(image_url.rfind('.')+1):]
+
 
 
 
