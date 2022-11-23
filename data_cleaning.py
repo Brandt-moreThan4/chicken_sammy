@@ -26,6 +26,11 @@ class DataCalcs:
     def most_liked_msg(self) -> "Message":
         return Message(self.df_msg.sort_values('like_count').iloc[-1])
 
+    def most_liked_msgs(self,msg_num:int=5)-> list["Message"]:
+        msg_num = min(msg_num,self.msg_count-1) # don't over-index
+        df = self.df_msg.sort_values('like_count',ascending=False).iloc[:msg_num]
+        return df.apply(Message,axis=1) # Convert to messages
+
 
 class DataWrangler(DataCalcs):
     DATA_PATH = Path('data') / '53526472'
@@ -121,6 +126,16 @@ class Message:
     def images(self) -> list["Attachment"]:
         return [attachment for attachment in self.attachments if attachment.is_image]
 
+    def html_display(self) -> str:
+        html_block = f'<div><p><b>{self.nickname}</b></p><i><q>{self.text}</q></i></div>'
+        if self.has_image:
+            # Grab the first image for now:
+            img = self.images[0]
+            img_html = f'''<div><img height="300" src="{img.image_url}" alt="Sammy Image"></div>'''
+
+            html_block += img_html
+        return html_block
+            
 
 
 class Attachment:

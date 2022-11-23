@@ -33,5 +33,11 @@ fig2 = px.bar(msg_counts,x='name',y='created_at')
 st.plotly_chart(fig2)
 
 st.markdown('### Hall of Fame: Most Liked Messages')
+msg_count = st.number_input("Select the number of most-liked messages you want to see:",1,10,3)
+msgs = gdata.most_liked_msgs(msg_count)
+
+for msg in msgs:
+    components.html(msg.html_display(),height=425,scrolling=True)
+
 
 print(f'Home: {datetime.now()}')

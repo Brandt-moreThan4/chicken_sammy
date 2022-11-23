@@ -10,8 +10,6 @@ members = sorted(gdata.member_names)
 members.remove('.') # It makes the UI look back.
 name_select = st.selectbox('Who who you like to get deep into?',members)
 
-st.write('Excellent choice, you selected:', name_select)
-
 user_id = gdata.id_map[gdata.id_map == name_select].index[0]
 person = Person(user_id,gdata)
 
@@ -22,7 +20,7 @@ st.markdown('#### Basic Stats')
 st.markdown("#### Your Most Liked Message")
 msg = person.most_liked_msg()
 msg_text = f'<i><q>{msg.text}</q></i>'
-components.html(msg_text,scrolling=True,height=150)
+components.html(msg_text,scrolling=True,height=120)
 if msg.has_image:
     # Grab the first image for now:
     img = msg.images[0]
