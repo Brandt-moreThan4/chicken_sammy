@@ -15,9 +15,22 @@ user_id = data_all.id_map[data_all.id_map == name_select].index[0]
 person = Person(user_id)
 st.markdown(person.html_display(),unsafe_allow_html=True)
 utils.write_spaces(1)
+
 st.markdown('#### Basic Stats')
-# Active Since
-# Message Count
+
+cols = st.columns(3)
+
+cols[0].metric(label="Active Since", value=str(person.first_msg_date.date()))
+cols[1].metric(label="Number of Messages", value=person.msg_count)
+cols[2].metric(label="Average Likes Per Message", value=round(person.get_avg_likes(),2))
+
+# st.markdown('##### Most Commonly Used Words')
+# st.write(person.common_descriptive_words.iloc[:10])
+fig, ax = person.get_word_cloud()
+st.pyplot(fig)
+
+utils.write_spaces(2)
+
 
 st.markdown("#### Your Most Liked Message")
 msg = person.most_liked_msg()

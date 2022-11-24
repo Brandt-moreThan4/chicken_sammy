@@ -4,10 +4,12 @@ import pandas as pd
 from datetime import datetime
 import calendar
 import spacy
+from spacy.tokens import Token
+import utils
 from collections import Counter
+import matplotlib.pyplot as plt
 
 nlp = spacy.load('en_core_web_sm')
-
 
 
 def has_image(data:list[dict]) -> bool:
@@ -21,11 +23,22 @@ def extract_imag_id(image_url:str) -> str:
     return image_url[(image_url.rfind('.')+1):]
 
 class DataCalcs:
-    def calculate_properties(self):
-        self.member_count = len(self.members_data)
-        self.msg_count = len(self.df_msg)
-        self.member_names = self.df_members.name.unique().tolist()
-        self.all_text = '. '.join(self.df_msg.text)
+
+    def __init__(self) -> None:
+        self.member_count = None
+        self.msg_count = None
+        self.member_names = None
+        self.all_text = None
+        self._cleaned_tokens =  None
+        self._descriptive_tokens = None
+        self._common_descriptive_words = None       
+        self.avg_likes = None
+
+    # def calculate_properties(self):
+    #     self.member_count = len(self.members_data)
+    #     self.msg_count = len(self.df_msg)
+    #     self.member_names = self.df_members.name.unique().tolist()
+    #     self.all_text = '. '.join(self.df_msg.text)
 
     def most_liked_msg(self) -> "Message":
         return Message(self.df_msg.sort_values('like_count').iloc[-1])
@@ -35,6 +48,33 @@ class DataCalcs:
         df = self.df_msg.sort_values('like_count',ascending=False).iloc[:msg_num]
         return df.apply(Message,axis=1) # Convert to messages
 
+    def get_avg_likes(self) -> float:
+        self.avg_likes = self.df_msg.like_count.mean()
+        return self.avg_likes
+
+
+    @property
+    def cleaned_tokens(self) -> pd.DataFrame:
+        if self._cleaned_tokens is None:
+            self._cleaned_tokens = utils.get_cleaned_tokens(self.all_text)
+        return self._cleaned_tokens        
+
+    @property
+    def descriptive_tokens(self) -> list[str]:
+        if self._descriptive_tokens is None:
+            self._descriptive_tokens = utils.get_descriptive_tokens(self.cleaned_tokens)
+        return self._descriptive_tokens
+
+    @property
+    def common_descriptive_words(self) -> pd.DataFrame:
+        if self._common_descriptive_words is None:
+            self._common_descriptive_words = utils.get_most_common_words(self.descriptive_tokens)
+        return self._common_descriptive_words
+
+    def get_word_cloud(self):
+        fig, ax = utils.get_word_cloud(tokens=self.descriptive_tokens)
+        return (fig, ax)
+
 
 class DataWrangler(DataCalcs):
     DATA_PATH = Path('data') / '53526472'
@@ -43,19 +83,18 @@ class DataWrangler(DataCalcs):
     ENCODING = 'utf-8'
 
     def __init__(self,load_data=True) -> None:
+        super().__init__()
         if load_data:
             self.load_all_data()
-        self.calculate_properties()
+        self.member_count = len(self.members_data)
+        self.msg_count = len(self.df_msg)
+        self.member_names = self.df_members.name.unique().tolist()
+        self.all_text = '. '.join(self.df_msg.text)
 
     def load_all_data(self):
         self.load_convo_data()
         self.load_message_data()
         self.clean_data()
-
-    # def calculate_properties(self):
-    #     self.member_count = len(self.members_data)
-    #     self.msg_count = len(self.df_msg)
-    #     self.member_names = self.df_members.name.unique().tolist()
 
 
     def load_message_data(self):
@@ -105,7 +144,7 @@ data_all = DataWrangler()
 
 class Person(DataCalcs):
     def __init__(self,user_id:str) -> None:
-
+        super().__init__()
         self.user_id:str = user_id
         self.data_all:DataWrangler = data_all
 
@@ -121,11 +160,13 @@ class Person(DataCalcs):
         self.first_msg_date:datetime = self.df_msg.created_at.min()
 
         # Grab the messages that belong to this person
-        self.messages:list[Attachment] = list(filter(lambda msg: msg.sender_id == user_id,all_msgs))
+        self.messages:list[Message] = list(filter(lambda msg: msg.sender_id == user_id,all_msgs))
         self.msg_count = len(self.messages)
+        self.all_text = '. '.join(self.df_msg.text)   
 
     def __repr__(self) -> str:
         return f'{self.name}: {self.first_msg_date}'
+      
 
     def get_most_liked_person(self):
         df_msg_favs = data_all.df_msg_favs
@@ -140,14 +181,12 @@ class Person(DataCalcs):
 
     def html_display(self) -> str:
         html_block = (
-            f'<div><b>{self.nickname}</b></div>'
+            f'<h5>{self.nickname}</h5>'
             f'<img height="150" src="{self.image_url}" alt="Profile Image">'
         )
 
         return html_block
-
     
-
 
 class Message:
     def __init__(self,row:pd.Series) -> None:
@@ -172,7 +211,7 @@ class Message:
         return [attachment for attachment in self.attachments if attachment.is_image]
 
     def html_display(self) -> str:
-        html_block = f'<div><p><b>{self.nickname}</b>: {self.created_at.date()}</p><i><q>{self.text}</q></i></div><br>'
+        html_block = f'<div><p><b>{self.nickname}</b>: {self.created_at.date()}</p><i>{self.text}</i></div><br>'
 
         if self.has_image:
             # Grab the first image for now:
@@ -201,42 +240,10 @@ all_msgs:list["Message"] = data_all.df_msg.apply(Message,axis=1).to_list()
 all_people:list[Person] = [Person(user_id) for user_id in data_all.df_members.index]
 
 hubbell = Person('5994102')
-msg = hubbell.most_liked_msg()
+# hubbell.common_descriptive_words.iloc[:10]
 
 
-def get_word_cloud(text:str):
-    '''Create a word cloud of the adjectives and adverbs from the input text. 
-    ## Returns a pyplot (fig, ax)'''
-    doc = nlp(text)
-    # tokens = [token for token in doc]
-    # # Remove stop words and punctuation
-    # tokens_clean = [token.text.lower() for token in doc if not token.is_stop and not token.is_punct and not token.is_space]
-    # freq = Counter(tokens_clean)
-    # freq.most_common(10)
-
-# tags = ['ADJ','ADV']
-# tokens_adj = [token.text.strip().lower() for token in doc if not token.is_stop and not token.is_punct and not token.is_space and token.pos_ in tags]
-# freq_adj = Counter(tokens_adj)
-# word_freqs = pd.DataFrame((freq_adj.most_common(len(freq_adj))))
-# word_freqs.columns = ['word','freq']
-
-# doc = nlp(data_all.all_text)
-# tokens = [token for token in doc]
-# # Remove stop words and punctuation
-# tokens_clean = [token.text.lower() for token in doc if not token.is_stop and not token.is_punct and not token.is_space]
-# freq = Counter(tokens_clean)
-# freq.most_common(10)
-
-# tags = ['ADJ','ADV']
-# tokens_adj = [token.text.strip().lower() for token in doc if not token.is_stop and not token.is_punct and not token.is_space and token.pos_ in tags]
-# freq_adj = Counter(tokens_adj)
-# word_freqs = pd.DataFrame((freq_adj.most_common(len(freq_adj))))
-# word_freqs.columns = ['word','freq']
-
-
-
-
-# for token in doc:
-#     print(token)
+# fig, ax = hubbell.get_word_cloud()
+# plt.show()
 
 print(f'Cleaning: {datetime.now()}')
