@@ -38,9 +38,9 @@ st.download_button(
 
 # You have to do a copy of the df because AgGrid mutates the df inplace.
 grid_options = GridOptionsBuilder.from_dataframe(data_all.df_msg.copy())
-grid_options.configure_pagination(50)
+grid_options.configure_pagination(20)
 grid_options = grid_options.build()
-AgGrid(data_all.df_msg.copy(),height=750,gridOptions=grid_options)
+AgGrid(data_all.df_msg.copy(),height=500,gridOptions=grid_options)
 
 
 st.markdown('## Muted People')
