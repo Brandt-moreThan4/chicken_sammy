@@ -1,13 +1,17 @@
-from pathlib import Path
-import matplotlib.pyplot as plt
+# from pathlib import Path
+# import matplotlib.pyplot as plt
 from datetime import datetime
 import streamlit as st
 import plotly.express as px
-import utils
-from data_cleaning import data_all #, word_freqs, tokens_adj
-# import streamlit.components.v1 as components
-# text = ' '.join(tokens_adj)
+# import utils
+from data_cleaning import data_all 
+from PIL import Image
 
+img = Image.open('sammy_icon2.png')
+st.set_page_config(
+    page_title="Sammy Squad",
+    page_icon=img,
+)
 
 INTRO_MD = '''
 ## A Chicken Sammy Adventure
