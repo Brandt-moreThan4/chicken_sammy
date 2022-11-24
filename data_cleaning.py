@@ -201,8 +201,7 @@ all_msgs:list["Message"] = data_all.df_msg.apply(Message,axis=1).to_list()
 all_people:list[Person] = [Person(user_id) for user_id in data_all.df_members.index]
 
 hubbell = Person('5994102')
-admirer = hubbell.get_biggest_admirer()
-fav = hubbell.get_most_liked_person()
+
 
 msg = hubbell.most_liked_msg()
 

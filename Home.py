@@ -4,9 +4,9 @@ from datetime import datetime
 import streamlit as st
 import plotly.express as px
 from wordcloud import WordCloud
-from data_cleaning import data_all, word_freqs, tokens_adj
+from data_cleaning import data_all #, word_freqs, tokens_adj
 # import streamlit.components.v1 as components
-text = ' '.join(tokens_adj)
+# text = ' '.join(tokens_adj)
 
 
 INTRO_MD = '''
@@ -18,20 +18,19 @@ INTRO_MD = '''
 
 st.markdown(INTRO_MD)
 
-text = ' '.join(tokens_adj)
+# text = ' '.join(tokens_adj)
 
 # Create the wordcloud object
-wordcloud = WordCloud(background_color = 'white',
-                    width = 512,
-                    height = 384
-                        ).generate(text)
+# wordcloud = WordCloud(background_color = 'white',
+#                     width = 512,
+#                     height = 384
+#                         ).generate(text)
 
-fig, ax = plt.subplots()
-ax.imshow(wordcloud)
-ax.axis("off")
-ax.margins(x=0, y=0)
-# plt.show()
-st.pyplot(fig)
+# fig, ax = plt.subplots()
+# ax.imshow(wordcloud)
+# ax.axis("off")
+# ax.margins(x=0, y=0)
+# st.pyplot(fig)
 
 df = data_all.df_msg
 

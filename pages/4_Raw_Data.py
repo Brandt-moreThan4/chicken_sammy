@@ -26,7 +26,7 @@ st.download_button(
     key='member-data'
 )
 
-st.markdown('## MSG Data: (Bug in Display here)')
+st.markdown('## MSG Data')
 st.download_button(
     "Press to Download Message Data",
     convert_df(data_all.df_msg),
