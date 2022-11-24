@@ -1,4 +1,5 @@
 
+from datetime import datetime
 import streamlit as st
 from data_cleaning import data_all
 import pandas as pd
@@ -35,11 +36,14 @@ st.download_button(
     key='msg-data'
 )
 
-grid_options = GridOptionsBuilder.from_dataframe(data_all.df_msg)
+# You have to do a copy of the df because AgGrid mutates the df inplace.
+grid_options = GridOptionsBuilder.from_dataframe(data_all.df_msg.copy())
 grid_options.configure_pagination(50)
 grid_options = grid_options.build()
-AgGrid(data_all.df_msg,height=750,gridOptions=grid_options)
+AgGrid(data_all.df_msg.copy(),height=750,gridOptions=grid_options)
 
 
 st.markdown('## Muted People')
 st.write(data_all.df_members.query('muted == True'))
+
+print(f'Cleaning: {datetime.now()}')

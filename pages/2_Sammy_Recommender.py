@@ -1,3 +1,4 @@
+from datetime import datetime
 import streamlit as st
 import utils
 
@@ -17,3 +18,6 @@ with st.form("my_form"):
 if submitted:
     st.markdown("#### Recommended Sammys")
     st.write("Haven't figured out how to do this yet...")
+
+
+print(f'Cleaning: {datetime.now()}')

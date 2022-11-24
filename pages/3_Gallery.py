@@ -1,3 +1,4 @@
+from datetime import datetime
 import streamlit as st
 import streamlit.components.v1 as components
 
@@ -16,3 +17,5 @@ picture = st.camera_input("Take a picture")
 
 if picture:
     st.image(picture)
+
+print(f'Cleaning: {datetime.now()}')

@@ -86,7 +86,7 @@ class DataWrangler(DataCalcs):
         df['has_image'] = df.attachments.apply(has_image)
         df['char_count'] = df.text.apply(lambda x: len(x) if not x is None else False )
         df['text'] = df['text'].fillna('')
-        df['tokens'] = [[(token.text) for token in nlp.tokenizer(msg)] for msg in df.text.array]
+        # df['tokens'] = [[(token.text) for token in nlp.tokenizer(msg)] for msg in df.text.array]
         df['date_month'] = df.created_at.dt.year.astype(str) + '-'+ df.created_at.dt.month.apply(lambda x: calendar.month_abbr[x])
         df = df.rename(columns={'name':'msg_name','id':'msg_id'}) # Be more explicit
 
@@ -141,7 +141,7 @@ class Person(DataCalcs):
     def html_display(self) -> str:
         html_block = (
             f'<div><b>{self.nickname}</b></div>'
-            f'<div><img height="150" src="{self.image_url}" alt="Profile Image"></div>'
+            f'<img height="150" src="{self.image_url}" alt="Profile Image">'
         )
 
         return html_block
@@ -201,11 +201,24 @@ all_msgs:list["Message"] = data_all.df_msg.apply(Message,axis=1).to_list()
 all_people:list[Person] = [Person(user_id) for user_id in data_all.df_members.index]
 
 hubbell = Person('5994102')
-
-
 msg = hubbell.most_liked_msg()
 
 
+def get_word_cloud(text:str):
+    '''Create a word cloud of the adjectives and adverbs from the input text. 
+    ## Returns a pyplot (fig, ax)'''
+    doc = nlp(text)
+    # tokens = [token for token in doc]
+    # # Remove stop words and punctuation
+    # tokens_clean = [token.text.lower() for token in doc if not token.is_stop and not token.is_punct and not token.is_space]
+    # freq = Counter(tokens_clean)
+    # freq.most_common(10)
+
+# tags = ['ADJ','ADV']
+# tokens_adj = [token.text.strip().lower() for token in doc if not token.is_stop and not token.is_punct and not token.is_space and token.pos_ in tags]
+# freq_adj = Counter(tokens_adj)
+# word_freqs = pd.DataFrame((freq_adj.most_common(len(freq_adj))))
+# word_freqs.columns = ['word','freq']
 
 # doc = nlp(data_all.all_text)
 # tokens = [token for token in doc]
@@ -226,4 +239,4 @@ msg = hubbell.most_liked_msg()
 # for token in doc:
 #     print(token)
 
-print('lol')
+print(f'Cleaning: {datetime.now()}')
