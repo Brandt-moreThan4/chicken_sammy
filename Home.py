@@ -13,7 +13,7 @@ INTRO_MD = '''
 ## A Chicken Sammy Adventure
 ##### *Boldly Going Where None Have Gone Before*
 #
-## Our Lingo
+### Overview
  '''
 
 st.markdown(INTRO_MD)

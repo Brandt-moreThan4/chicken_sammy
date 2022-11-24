@@ -140,7 +140,7 @@ class Person(DataCalcs):
 
     def html_display(self) -> str:
         html_block = (
-            f'<div><b>{self.nickname}</b></div><br>'
+            f'<div><b>{self.nickname}</b></div>'
             f'<div><img height="150" src="{self.image_url}" alt="Profile Image"></div>'
         )
 
@@ -207,35 +207,19 @@ fav = hubbell.get_most_liked_person()
 msg = hubbell.most_liked_msg()
 
 
-def is_token_allowed(token):
-     '''
-         Only allow valid tokens which are not stop words
-         and punctuation symbols.
-     '''
-     if (not token or not token.string.strip() or
-         token.is_stop or token.is_punct):
-         return False
-     return True
 
-def preprocess_token(token):
-    # Reduce token to its lowercase lemma form
-    return token.lemma_.strip().lower()
+# doc = nlp(data_all.all_text)
+# tokens = [token for token in doc]
+# # Remove stop words and punctuation
+# tokens_clean = [token.text.lower() for token in doc if not token.is_stop and not token.is_punct and not token.is_space]
+# freq = Counter(tokens_clean)
+# freq.most_common(10)
 
-
-doc = nlp(data_all.all_text)
-tokens = [token for token in doc]
-# Remove stop words and punctuation
-tokens_clean = [token.text.lower() for token in doc if not token.is_stop and not token.is_punct and not token.is_space]
-freq = Counter(tokens_clean)
-freq.most_common(10)
-
-tags = ['ADJ','ADV']
-tokens_adj = [token.text.strip().lower() for token in doc if not token.is_stop and not token.is_punct and not token.is_space and token.pos_ in tags]
-freq_adj = Counter(tokens_adj)
-word_freqs = pd.DataFrame((freq_adj.most_common(len(freq_adj))))
-word_freqs.columns = ['word','freq']
-
-
+# tags = ['ADJ','ADV']
+# tokens_adj = [token.text.strip().lower() for token in doc if not token.is_stop and not token.is_punct and not token.is_space and token.pos_ in tags]
+# freq_adj = Counter(tokens_adj)
+# word_freqs = pd.DataFrame((freq_adj.most_common(len(freq_adj))))
+# word_freqs.columns = ['word','freq']
 
 
 

@@ -1,9 +1,8 @@
 import pandas as pd
+import streamlit as st
 
 def convert_df(df:pd.DataFrame):
     return df.to_csv().encode('utf-8')
-
-
 
 
 def is_token_allowed(token):
@@ -19,3 +18,8 @@ def is_token_allowed(token):
 def preprocess_token(token):
     # Reduce token to its lowercase lemma form
     return token.lemma_.strip().lower()
+
+
+def write_spaces(space_number:int=1):
+    for _ in range(space_number):
+        st.write('')
