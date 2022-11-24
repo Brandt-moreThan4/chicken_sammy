@@ -2,7 +2,6 @@ from pathlib import Path
 import json
 import pandas as pd
 from datetime import datetime
-from typing import List
 import streamlit as st
 import plotly.express as px
 import matplotlib.pyplot as plt
@@ -13,12 +12,15 @@ from nltk import FreqDist
 
 
 
-def has_image(data:List[dict]) -> bool:
+def has_image(data:list[dict]) -> bool:
     contains_image = False   
     for dicky in data:
        if dicky['type'] == 'image':
            contains_image = True
     return contains_image
+
+def extract_imag_id(image_url:str) -> str:
+    return image_url[(image_url.rfind('.')+1):]
 
 class DataCalcs:
     def calculate_properties(self):
@@ -96,25 +98,62 @@ class DataWrangler(DataCalcs):
         df = df.drop(columns=COLS_TO_DROP)       
 
         self.df_msg = df
+        # Also want to save an version of the messages that has the favorite column exploded:
+        self.df_msg_favs = df.explode('favorited_by')
 
 
-gdata = DataWrangler()
+data_all = DataWrangler()
+
 
 class Person(DataCalcs):
-    def __init__(self,user_id:str,data_all:DataWrangler=gdata) -> None:
+    def __init__(self,user_id:str) -> None:
 
-        self.user_id = user_id
-        self.all_data = data_all
+        self.user_id:str = user_id
+        self.data_all:DataWrangler = data_all
+
         df_msg_all = data_all.df_msg
-        self.df_msg = df_msg_all[df_msg_all.user_id == user_id]
-        self.member_info = data_all.df_members[data_all.df_members.index == user_id]
-        self.name = self.member_info.name
+        self.df_msg:pd.DataFrame = df_msg_all[df_msg_all.user_id == user_id]
+
+        member_info = data_all.df_members.loc[user_id]
+        self.muted:bool = member_info['muted']
+        self.nickname:str = member_info['nickname']
+        self.name:str = member_info['name']
+        self.image_url:str = member_info['image_url']
+        self.image_id:str = extract_imag_id(self.image_url)
+        self.first_msg_date:datetime = self.df_msg.created_at.min()
+
+        # Grab the messages that belong to this person
+        self.messages:list[Attachment] = list(filter(lambda msg: msg.sender_id == user_id,all_msgs))
+        self.msg_count = len(self.messages)
+
+    def __repr__(self) -> str:
+        return f'{self.name}: {self.first_msg_date}'
+
+    def get_most_liked_person(self):
+        df_msg_favs = data_all.df_msg_favs
+        self.most_liked =  Person(df_msg_favs[df_msg_favs.favorited_by == self.user_id].user_id.value_counts().index[0])
+        return self.most_liked
+
+    def get_biggest_admirer(self):
+        df_msg_favs = data_all.df_msg_favs
+        # All admirerers: df_msg_favs[df_msg_favs.user_id == self.user_id].favorited_by.value_counts().index[0]
+        self.biggest_admirer = Person(df_msg_favs[df_msg_favs.user_id == self.user_id].favorited_by.value_counts().index[0])
+        return self.biggest_admirer
+
+    def html_display(self) -> str:
+        html_block = (
+            f'<div><b>{self.nickname}</b></div><br>'
+            f'<div><img height="150" src="{self.image_url}" alt="Profile Image"></div>'
+        )
+
+        return html_block
+
     
+
 
 class Message:
     def __init__(self,row:pd.Series) -> None:
         self.text:str = row['text']
-
         self.created_at:datetime = row['created_at']
         self.sender_name: str = row['msg_name']
         self.sender_id:str = row['user_id']
@@ -122,17 +161,20 @@ class Message:
         self.likes:int = row['like_count']
         self._permname:str = row['name']
         self.nickname:str = row['nickname']
-        self.liked_by:List[str] = row['favorited_by']
+        self.liked_by:list[str] = row['favorited_by']
         self.char_count:int = row['char_count']
         self.has_image:bool = row['has_image']
         self.attachments:list[Attachment] = [Attachment(data) for data in row['attachments']]
+
+    def __repr__(self) -> str:
+        return f'{self.created_at} --{self.sender_name} -- {self.text}'
 
     @property
     def images(self) -> list["Attachment"]:
         return [attachment for attachment in self.attachments if attachment.is_image]
 
     def html_display(self) -> str:
-        html_block = f'<div><p><b>{self.nickname}</b></p><i><q>{self.text}</q></i></div>'
+        html_block = f'<div><p><b>{self.nickname}</b>: {self.created_at.date()}</p><i><q>{self.text}</q></i></div>'
         if self.has_image:
             # Grab the first image for now:
             img = self.images[0]
@@ -152,18 +194,17 @@ class Attachment:
         if self.type == 'image':
              self.is_image:bool = True
              self.image_url:str = attachment['url']
-             self.image_id:str = self.extract_imag_id(self.image_url)
-
-    @staticmethod
-    def extract_imag_id(image_url:str) -> str:
-        return image_url[(image_url.rfind('.')+1):]
+             self.image_id:str = extract_imag_id(self.image_url)
 
 
 
+all_msgs:list["Message"] = data_all.df_msg.apply(Message,axis=1).to_list()
+all_people:list[Person] = [Person(user_id) for user_id in data_all.df_members.index]
 
+hubbell = Person('5994102')
+admirer = hubbell.get_biggest_admirer()
+fav = hubbell.get_most_liked_person()
 
-
-person = Person('5994102',gdata)
-msg = person.most_liked_msg()
+msg = hubbell.most_liked_msg()
 
 print('lol')

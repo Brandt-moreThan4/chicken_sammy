@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import List
 import streamlit as st
 import plotly.express as px
-from data_cleaning import gdata
+from data_cleaning import data_all
 import streamlit.components.v1 as components
 
 components.html('<h1>Hery</h1>')
