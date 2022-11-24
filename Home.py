@@ -1,24 +1,37 @@
 from pathlib import Path
-import json
-import pandas as pd
+import matplotlib.pyplot as plt
 from datetime import datetime
-from typing import List
 import streamlit as st
 import plotly.express as px
-from data_cleaning import data_all
-import streamlit.components.v1 as components
-
+from wordcloud import WordCloud
+from data_cleaning import data_all, word_freqs, tokens_adj
+# import streamlit.components.v1 as components
+text = ' '.join(tokens_adj)
 
 
 INTRO_MD = '''
 ## A Chicken Sammy Adventure
 ##### *Boldly Going Where None Have Gone Before*
 #
-## Analysis
+## Our Lingo
  '''
 
 st.markdown(INTRO_MD)
 
+text = ' '.join(tokens_adj)
+
+# Create the wordcloud object
+wordcloud = WordCloud(background_color = 'white',
+                    width = 512,
+                    height = 384
+                        ).generate(text)
+
+fig, ax = plt.subplots()
+ax.imshow(wordcloud)
+ax.axis("off")
+ax.margins(x=0, y=0)
+# plt.show()
+st.pyplot(fig)
 
 df = data_all.df_msg
 

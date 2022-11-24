@@ -1,17 +1,26 @@
-
-import spacy
-nlp = spacy.load('en_core_web_sm')
-
-
-
-text = ("When Sebastian Thrun started working on self-driving cars at "
-        "Google in 2007, few people outside of the company took him "
-        "seriously. “I can tell you very senior CEOs of major American "
-        "car companies would shake my hand and turn away because I wasn’t "
-        "worth talking to,” said Thrun, in an interview with Recode earlier "
-        "this week.")
-
-doc = nlp(text)
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+from data_cleaning import word_freqs, tokens_adj
+text = ' '.join(tokens_adj)
+# Create a list of word
 
 
-print('hi')
+
+text = ' '.join(tokens_adj)
+
+# Create the wordcloud object
+wordcloud = WordCloud(background_color = 'white',
+                    width = 512,
+                    height = 384
+                        ).generate(text)
+
+# Display the generated image:
+# fig, ax = plt.subtplots()
+
+plt.imshow(wordcloud)
+plt.axis("off")
+plt.margins(x=0, y=0)
+plt.show()
+
+
+print('lol')
