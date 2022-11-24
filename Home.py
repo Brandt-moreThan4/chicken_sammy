@@ -19,9 +19,8 @@ INTRO_MD = '''
 st.markdown(INTRO_MD)
 
 
-
-# fig, ax = data_all.get_word_cloud()
-# st.pyplot(fig)
+fig, ax = data_all.get_word_cloud()
+st.pyplot(fig)
 
 df = data_all.df_msg
 
