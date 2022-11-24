@@ -6,9 +6,8 @@ import streamlit as st
 import plotly.express as px
 import matplotlib.pyplot as plt
 import streamlit.components.v1 as components
-# import nltk
-from nltk.tokenize import sent_tokenize, word_tokenize
-from nltk import FreqDist
+
+import calendar
 
 
 
@@ -88,7 +87,7 @@ class DataWrangler(DataCalcs):
         df['has_image'] = df.attachments.apply(has_image)
         df['char_count'] = df.text.apply(lambda x: len(x) if not x is None else False )
         df['text'] = df['text'].fillna('')
-        df['tokens'] = [word_tokenize(msg) for msg in df.text.array]
+        # df['tokens'] = [word_tokenize(msg) for msg in df.text.array]
         # df['date_month'] = pd.PeriodIndex(year=df['created_at'].dt.year,month=df['created_at'].dt.month,freq='M')
         df = df.rename(columns={'name':'msg_name','id':'msg_id'}) # Be more explicit
 
