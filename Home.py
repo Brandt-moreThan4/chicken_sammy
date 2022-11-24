@@ -1,26 +1,39 @@
 from pathlib import Path
-import json
-import pandas as pd
+import matplotlib.pyplot as plt
 from datetime import datetime
-from typing import List
 import streamlit as st
 import plotly.express as px
-from data_cleaning import gdata
-import streamlit.components.v1 as components
-
+from wordcloud import WordCloud
+from data_cleaning import data_all, word_freqs, tokens_adj
+# import streamlit.components.v1 as components
+text = ' '.join(tokens_adj)
 
 
 INTRO_MD = '''
 ## A Chicken Sammy Adventure
 ##### *Boldly Going Where None Have Gone Before*
 #
-## Analysis
+## Our Lingo
  '''
 
 st.markdown(INTRO_MD)
 
+text = ' '.join(tokens_adj)
 
-df = gdata.df_msg
+# Create the wordcloud object
+wordcloud = WordCloud(background_color = 'white',
+                    width = 512,
+                    height = 384
+                        ).generate(text)
+
+fig, ax = plt.subplots()
+ax.imshow(wordcloud)
+ax.axis("off")
+ax.margins(x=0, y=0)
+# plt.show()
+st.pyplot(fig)
+
+df = data_all.df_msg
 
 st.markdown('### Wordiest Individuals')
 char_counts = df.groupby('name')['char_count'].mean().sort_values(ascending=False).to_frame().iloc[:15].reset_index()
@@ -33,11 +46,12 @@ fig2 = px.bar(msg_counts,x='name',y='created_at')
 st.plotly_chart(fig2)
 
 st.markdown('### Hall of Fame: Most Liked Messages')
-msg_count = st.number_input("Select the number of most-liked messages you want to see:",1,10,3)
-msgs = gdata.most_liked_msgs(msg_count)
+msg_num = st.number_input("**Select the number of most-liked messages you want to see:**",1,10,3)
+msgs = data_all.most_liked_msgs(msg_num)
 
 for msg in msgs:
-    components.html(msg.html_display(),height=425,scrolling=True)
+    st.markdown(msg.html_display(),unsafe_allow_html=True)
+    st.markdown('<hr>',unsafe_allow_html=True)
 
 
 print(f'Home: {datetime.now()}')
