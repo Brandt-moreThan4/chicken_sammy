@@ -6,8 +6,10 @@ import streamlit as st
 import plotly.express as px
 import matplotlib.pyplot as plt
 import streamlit.components.v1 as components
-
 import calendar
+import spacy
+
+nlp = spacy.load('en_core_web_sm')
 
 
 
@@ -87,8 +89,8 @@ class DataWrangler(DataCalcs):
         df['has_image'] = df.attachments.apply(has_image)
         df['char_count'] = df.text.apply(lambda x: len(x) if not x is None else False )
         df['text'] = df['text'].fillna('')
-        # df['tokens'] = [word_tokenize(msg) for msg in df.text.array]
-        # df['date_month'] = pd.PeriodIndex(year=df['created_at'].dt.year,month=df['created_at'].dt.month,freq='M')
+        df['tokens'] = [[(token.text) for token in nlp.tokenizer(msg)] for msg in df.text.array]
+        df['date_month'] = df.created_at.dt.year.astype(str) + '-'+ df.created_at.dt.month.apply(lambda x: calendar.month_abbr[x])
         df = df.rename(columns={'name':'msg_name','id':'msg_id'}) # Be more explicit
 
         # Combine with member data:
@@ -173,7 +175,8 @@ class Message:
         return [attachment for attachment in self.attachments if attachment.is_image]
 
     def html_display(self) -> str:
-        html_block = f'<div><p><b>{self.nickname}</b>: {self.created_at.date()}</p><i><q>{self.text}</q></i></div>'
+        html_block = f'<div><p><b>{self.nickname}</b>: {self.created_at.date()}</p><i><q>{self.text}</q></i></div><br>'
+
         if self.has_image:
             # Grab the first image for now:
             img = self.images[0]

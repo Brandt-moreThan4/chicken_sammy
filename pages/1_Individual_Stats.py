@@ -21,13 +21,8 @@ st.markdown('#### Basic Stats')
 
 st.markdown("#### Your Most Liked Message")
 msg = person.most_liked_msg()
-msg_text = f'<i><q>{msg.text}</q></i>'
-components.html(msg_text,scrolling=True,height=120)
-if msg.has_image:
-    # Grab the first image for now:
-    img = msg.images[0]
-    img_html = f''' <img height="300" src="{img.image_url}" alt="Sammy Image"> '''
-    components.html(img_html,height=300)
+st.markdown(msg.html_display(),unsafe_allow_html=True)
+# st.markdown('<hr>',unsafe_allow_html=True)
 
 
 
@@ -43,6 +38,7 @@ msg_number = st.number_input("Select the number of most-liked Messages you want 
 
 most_liked_msgs = person.most_liked_msgs(msg_number)
 for msg in most_liked_msgs:
-    components.html(msg.html_display(),height=425,scrolling=True)
+    st.markdown(msg.html_display(),unsafe_allow_html=True)
+    st.markdown('<hr>',unsafe_allow_html=True)
 
 st.markdown('#### ')
