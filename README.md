@@ -1,4 +1,10 @@
-# TO DO:
+# Overview
+This project existed as a means for me to analyze all of the messaging data in a big groupme chat I'm in. The groupchat is soell dedicated to discussion around chicken sandwhiches. It's a collection of people who share their experiences and reccommendations for chicken sammies they have sampled around the country.
+
+App Link: [Chicken Sammy Site](https://brandt-morethan4-sammy.streamlit.app/)
+
+
+# Future TO DO?
 1. Handle multiple images in a message??
 2. Handle the case where someone posted an image and a text in back to back messages??
 3. List of all reviewed sammy's?
